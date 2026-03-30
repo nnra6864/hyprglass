@@ -5,6 +5,8 @@
 #include <hyprutils/math/Box.hpp>
 #include <optional>
 
+using namespace Render::GL;
+
 namespace WindowGeometry {
 
 [[nodiscard]] inline std::optional<CBox> computeWindowBox(PHLWINDOW window, PHLMONITOR monitor) {

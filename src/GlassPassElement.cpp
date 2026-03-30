@@ -9,6 +9,14 @@
 CGlassPassElement::CGlassPassElement(const SGlassPassData& data)
     : m_data(data) {}
 
+std::vector<UP<IPassElement>> CGlassPassElement::draw() {
+    if (!m_data.decoration)
+        return {};
+
+    m_data.decoration->renderPass(g_pHyprRenderer->m_renderData.pMonitor.lock(), m_data.alpha);
+    return {};
+}
+
 std::optional<CBox> CGlassPassElement::boundingBox() {
     if (!m_data.decoration)
         return std::nullopt;

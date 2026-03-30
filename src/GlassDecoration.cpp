@@ -13,6 +13,8 @@
 #include <hyprland/src/render/Renderer.hpp>
 #include <hyprutils/math/Misc.hpp>
 
+using namespace Render::GL;
+
 CGlassDecoration::CGlassDecoration(PHLWINDOW window)
     : IHyprWindowDecoration(window), m_window(window) {
 }
@@ -99,7 +101,7 @@ PHLWINDOW CGlassDecoration::getOwner() {
     return m_window.lock();
 }
 
-void CGlassDecoration::sampleBackground(SP<IFramebuffer> sourceFramebuffer, CBox box) {
+void CGlassDecoration::sampleBackground(SP<Render::IFramebuffer> sourceFramebuffer, CBox box) {
     const int pad = SAMPLE_PADDING_PX;
     int paddedWidth  = static_cast<int>(box.width) + 2 * pad;
     int paddedHeight = static_cast<int>(box.height) + 2 * pad;
@@ -131,7 +133,7 @@ void CGlassDecoration::sampleBackground(SP<IFramebuffer> sourceFramebuffer, CBox
     // The render pass scissors each element to its damage region.
     // That scissor state leaks here and clips glBlitFramebuffer on the
     // DRAW framebuffer, causing partial writes and stale noise artifacts.
-    g_pHyprOpenGL->setCapStatus(GL_SCISSOR_TEST, false);
+    Render::GL::g_pHyprOpenGL->setCapStatus(GL_SCISSOR_TEST, false);
 
     glBindFramebuffer(GL_READ_FRAMEBUFFER, GLFB(sourceFramebuffer)->getFBID());
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, GLFB(m_sampleFramebuffer)->getFBID());
@@ -161,12 +163,12 @@ void CGlassDecoration::blurBackground(float radius, int iterations, GLuint calle
 
     const auto& blurUniforms = shaderManager.blurUniforms;
 
-    auto shader = g_pHyprOpenGL->useShader(shaderManager.blurShader);
+    auto shader = Render::GL::g_pHyprOpenGL->useShader(shaderManager.blurShader);
     shader->setUniformMatrix3fv(SHADER_PROJ, 1, GL_FALSE, FULLSCREEN_PROJECTION);
     shader->setUniformInt(SHADER_TEX, 0);
     glUniform1f(blurUniforms.radius, radius);
     glBindVertexArray(shader->getUniformLocation(SHADER_SHADER_VAO));
-    g_pHyprOpenGL->setViewport(0, 0, width, height);
+    Render::GL::g_pHyprOpenGL->setViewport(0, 0, width, height);
     glActiveTexture(GL_TEXTURE0);
 
     // Ping-pong at full resolution: m_sampleFramebuffer ↔ blurTempFramebuffer
@@ -187,7 +189,7 @@ void CGlassDecoration::blurBackground(float radius, int iterations, GLuint calle
     // Restore caller's GL state without querying (avoids pipeline stalls)
     glBindFramebuffer(GL_FRAMEBUFFER, callerFramebufferID);
     glBindVertexArray(0);
-    g_pHyprOpenGL->setViewport(0, 0, viewportWidth, viewportHeight);
+    Render::GL::g_pHyprOpenGL->setViewport(0, 0, viewportWidth, viewportHeight);
 }
 
 void CGlassDecoration::uploadThemeUniforms(const SResolveContext& ctx) const {
@@ -205,7 +207,7 @@ void CGlassDecoration::uploadThemeUniforms(const SResolveContext& ctx) const {
     glUniform1f(uniforms.adaptiveBoost, resolvePresetFloat(ctx, &SPresetValues::adaptiveBoost, &SOverridableConfig::adaptiveBoost, defaults.adaptiveBoost));
 }
 
-void CGlassDecoration::applyGlassEffect(SP<IFramebuffer> sourceFramebuffer, SP<IFramebuffer> targetFramebuffer,
+void CGlassDecoration::applyGlassEffect(SP<Render::IFramebuffer> sourceFramebuffer, SP<Render::IFramebuffer> targetFramebuffer,
                                          CBox& rawBox, CBox& transformedBox, float windowAlpha) {
     const auto& config   = g_pGlobalState->config;
     auto& shaderManager  = g_pGlobalState->shaderManager;
@@ -227,7 +229,7 @@ void CGlassDecoration::applyGlassEffect(SP<IFramebuffer> sourceFramebuffer, SP<I
     glActiveTexture(GL_TEXTURE0);
     texture->bind();
 
-    auto shader = g_pHyprOpenGL->useShader(shaderManager.glassShader);
+    auto shader = Render::GL::g_pHyprOpenGL->useShader(shaderManager.glassShader);
 
     shader->setUniformMatrix3fv(SHADER_PROJ, 1, GL_FALSE, glMatrix.getMatrix());
     shader->setUniformInt(SHADER_TEX, 0);
@@ -266,9 +268,9 @@ void CGlassDecoration::applyGlassEffect(SP<IFramebuffer> sourceFramebuffer, SP<I
     shader->setUniformFloat(SHADER_ROUNDING_POWER, roundingPower);
 
     glBindVertexArray(shader->getUniformLocation(SHADER_SHADER_VAO));
-    g_pHyprOpenGL->scissor(rawBox);
+    Render::GL::g_pHyprOpenGL->scissor(rawBox);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    g_pHyprOpenGL->scissor(nullptr);
+    Render::GL::g_pHyprOpenGL->scissor(nullptr);
 }
 
 void CGlassDecoration::renderPass(PHLMONITOR monitor, const float& alpha) {

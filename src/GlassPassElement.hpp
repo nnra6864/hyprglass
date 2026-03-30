@@ -23,8 +23,10 @@ class CGlassPassElement : public IPassElement {
 
     [[nodiscard]] const char* passName() override { return "CGlassPassElement"; }
 
+    virtual std::vector<UP<IPassElement>> draw();
+
     virtual ePassElementType type() override {
-        return EK_FRAMEBUFFER;
+        return EK_CUSTOM;
     }
     
   private:

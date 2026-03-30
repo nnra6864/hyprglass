@@ -30,7 +30,7 @@ class CGlassDecoration : public IHyprWindowDecoration {
 
   private:
     PHLWINDOWREF m_window;
-    SP<IFramebuffer> m_sampleFramebuffer;
+    SP<Render::IFramebuffer> m_sampleFramebuffer;
     Vector2D     m_samplePaddingRatio;
 
     // Track last rendered position/size to detect actual changes and seed damage
@@ -40,10 +40,10 @@ class CGlassDecoration : public IHyprWindowDecoration {
     [[nodiscard]] bool        resolveThemeIsDark() const;
     [[nodiscard]] std::string resolvePresetName() const;
 
-    void sampleBackground(SP<IFramebuffer> sourceFramebuffer, CBox box);
+    void sampleBackground(SP<Render::IFramebuffer> sourceFramebuffer, CBox box);
     void blurBackground(float radius, int iterations, GLuint callerFramebufferID, int viewportWidth, int viewportHeight);
 
-    void applyGlassEffect(SP<IFramebuffer> sourceFramebuffer, SP<IFramebuffer> targetFramebuffer,
+    void applyGlassEffect(SP<Render::IFramebuffer> sourceFramebuffer, SP<Render::IFramebuffer> targetFramebuffer,
                           CBox& rawBox, CBox& transformedBox, float windowAlpha);
     void uploadThemeUniforms(const SResolveContext& resolveContext) const;
 

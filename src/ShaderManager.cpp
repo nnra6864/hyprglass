@@ -18,7 +18,7 @@ std::string CShaderManager::loadShaderSource(const char* fileName) {
 
 bool CShaderManager::compileGlassShader() {
     if (!glassShader->createProgram(
-            g_pHyprOpenGL->m_shaders->TEXVERTSRC,
+            Render::GL::g_pHyprOpenGL->m_shaders->TEXVERTSRC,
             loadShaderSource("liquidglass.frag"),
             true
         )) {
@@ -50,7 +50,7 @@ bool CShaderManager::compileGlassShader() {
 
 bool CShaderManager::compileBlurShader() {
     if (!blurShader->createProgram(
-            g_pHyprOpenGL->m_shaders->TEXVERTSRC,
+            Render::GL::g_pHyprOpenGL->m_shaders->TEXVERTSRC,
             loadShaderSource("gaussianblur.frag"),
             true
         )) {
